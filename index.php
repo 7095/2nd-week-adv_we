@@ -2,10 +2,9 @@
 require('vendor/autoload.php');
 
 //test for navigation after auth
-session_start();
+//session_start();
 //$_SESSION['auth']= true;
-session_destroy();
-
+//session_destroy();
 
 
 use aitsydney\Navigation;
@@ -19,6 +18,9 @@ use aitsydney\Product;
 $products = new Product();
 $products_result = $products -> getproducts();
 
+use aitsydney\Category;
+$cat = new Category();
+$categories = $cat -> getCategories();
 
 // create twig loader
 //initialize twig templates
@@ -34,6 +36,7 @@ $template = $twig -> load('home.twig');
 
 //pass values to twig
 echo $template -> render([
+    'categories' =>$categories,
     'navigation' => $nav_items,
     'products' => $products_result,
     'title' => 'Hello Shop'
