@@ -9,11 +9,15 @@ class Account extends Database{
     }
     public function register($email,$password){
         $query ="
-        insert into account (account_id,email,password,created)
-        values(?,?,?,NOW() )
+        insert into account ( account_id ,email,password,created,accessed, updated)
+        values( UNHEX(?),?,?, NOW(), NOW(), NOW() )
         
+
         ";
+        
         $register_errors = array();
+        $response = array();
+
         if(strlen($password)<8){
             $register_errors['password']="minimum 8 characters";
         }
@@ -28,20 +32,34 @@ class Account extends Database{
             $account_id = $this -> createAccountId();
             try{
                 if($statement = $this -> connection -> prepare($query) == false){
-                    throw ( new Exception('query error'));
+                    throw ( new \Exception('query error'));
 
                 }
-                $statement -> bind_param('sss',$account_id,$email,$hash);
+                if($statement -> bind_param('sss',$account_id, $email, $hash )== false){
+                    throw( new\Exception('cannot bind param') );
+                }
                 if($statement -> execute() == false){
-                    throw( new Exception('faild to execute'));
+                    throw( new \Exception('faild to execute'));
                 }
                 else{
                     //account is created in database
+                    
+                    $response['success'] = true;
                 }
 
             }
 
+            catch(Exception $exc ){
+                error_log($exc -> getmeesage());
+
+            }
+
         }
+        else{
+            $response['errors'] = $register_errors;
+            $response['success'] =false;
+        }
+        return $response;
     }
     private function createAccountId(){
         //get random bytes
